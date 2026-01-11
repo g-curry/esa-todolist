@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo List 待办事项（终极增强版）</title>
+    <title>全能多维待办管理系统（TodoMaster Pro）</title>
     <style>
         /* ===================== 全局样式 & 主题变量 ===================== */
         :root {
@@ -330,6 +330,7 @@
         .add-row {
             display: flex;
             gap: var(--spacing-sm);
+            flex-wrap: wrap; /* 修复：允许换行 */
         }
 
         #todo-input {
@@ -341,6 +342,7 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             transition: var(--transition);
+            min-width: 200px; /* 修复：最小宽度，避免挤压 */
         }
 
         #todo-input:focus {
@@ -356,6 +358,8 @@
         .add-select-group {
             display: flex;
             gap: var(--spacing-sm);
+            flex-wrap: wrap; /* 修复：选择器组换行 */
+            align-items: center; /* 修复：垂直居中 */
         }
 
         .form-select {
@@ -370,15 +374,18 @@
         }
 
         .category-select {
-            width: 120px;
+            width: 110px; /* 修复：微调宽度 */
+            min-width: 100px;
         }
 
         .priority-select {
-            width: 120px;
+            width: 110px; /* 修复：微调宽度 */
+            min-width: 100px;
         }
 
         .date-select {
-            width: 160px;
+            width: 140px; /* 修复：微调宽度 */
+            min-width: 120px;
         }
 
         .form-select:focus {
@@ -403,7 +410,8 @@
         .btn-add {
             background-color: var(--primary-color);
             color: white;
-            width: 120px;
+            min-width: 100px; /* 修复：最小宽度 */
+            flex-shrink: 0; /* 修复：禁止压缩 */
         }
 
         .btn-add:hover {
@@ -418,7 +426,7 @@
             fill: white;
         }
 
-        /* ===================== 筛选区域（状态+分类+优先级） ===================== */
+        /* ===================== 筛选区域（状态+分类+优先级+快捷） ===================== */
         .filter-container {
             display: flex;
             flex-wrap: wrap;
@@ -504,7 +512,7 @@
         .btn-priority.medium::before { background-color: var(--priority-medium); }
         .btn-priority.low::before { background-color: var(--priority-low); }
 
-        /* ===================== 批量操作区域 ===================== */
+        /* ===================== 批量操作 & 数据操作区域 ===================== */
         .batch-operation {
             display: flex;
             justify-content: space-between;
@@ -512,6 +520,12 @@
             margin-bottom: var(--spacing-md);
             padding-bottom: var(--spacing-md);
             border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-operation {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
         }
 
         .batch-select {
@@ -569,6 +583,7 @@
             max-height: 400px;
             overflow-y: auto;
             padding-right: var(--spacing-sm);
+            position: relative; /* 拖拽排序需要 */
         }
 
         .todo-list::-webkit-scrollbar {
@@ -598,6 +613,7 @@
             background-color: var(--bg-secondary);
             margin-bottom: var(--spacing-sm);
             transition: var(--transition);
+            cursor: grab; /* 拖拽提示 */
         }
 
         .todo-item:hover {
@@ -788,6 +804,18 @@
         }
 
         /* ===================== 响应式适配 ===================== */
+        @media (max-width: 900px) and (min-width: 768px) {
+            .add-select-group {
+                flex-wrap: wrap;
+            }
+            .category-select, .priority-select {
+                width: calc(50% - 0.25rem);
+            }
+            .date-select, .btn-add {
+                width: calc(50% - 0.25rem);
+            }
+        }
+
         @media (max-width: 768px) {
             .todo-header {
                 flex-direction: column;
@@ -816,10 +844,12 @@
 
             .add-select-group {
                 flex-direction: column;
+                width: 100%;
             }
 
             .category-select, .priority-select, .date-select, .btn-add {
                 width: 100%;
+                min-width: unset;
             }
 
             .filter-container {
@@ -853,6 +883,16 @@
                 flex: 1;
                 justify-content: center;
             }
+
+            .data-operation {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            #export-btn, .data-operation label {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -866,7 +906,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                         </svg>
-                        待办事项清单（终极增强版）
+                        全能多维待办管理系统（TodoMaster Pro）
                     </h1>
                     <div class="theme-selector">
                         <button class="theme-btn" id="theme-btn">
@@ -954,7 +994,7 @@
                 </div>
             </div>
 
-            <!-- 筛选区域（状态+分类+优先级） -->
+            <!-- 筛选区域（状态+分类+优先级+快捷） -->
             <div class="filter-container">
                 <div class="filter-group">
                     <div class="filter-label">状态筛选</div>
@@ -983,6 +1023,13 @@
                         <button class="btn btn-filter btn-priority low" data-priority="low">低优先级</button>
                     </div>
                 </div>
+                <div class="filter-group">
+                    <div class="filter-label">快捷筛选</div>
+                    <div class="todo-filter" id="quick-filter">
+                        <button class="btn btn-filter active" data-quick="all">全部</button>
+                        <button class="btn btn-filter" data-quick="today">今日待办</button>
+                    </div>
+                </div>
             </div>
 
             <!-- 批量操作区域 -->
@@ -995,6 +1042,15 @@
                     <button class="btn btn-batch btn-batch-complete" id="batch-complete-btn">批量完成</button>
                     <button class="btn btn-batch btn-batch-delete" id="batch-delete-btn">批量删除</button>
                 </div>
+            </div>
+
+            <!-- 数据导出/导入区域 -->
+            <div class="data-operation">
+                <button class="btn btn-batch" id="export-btn" style="margin-right: 0.5rem; background: var(--primary-color); color: white;">导出数据</button>
+                <label class="btn btn-batch" style="background: var(--success-color); color: white; cursor: pointer;">
+                    导入数据
+                    <input type="file" id="import-input" accept=".json" style="display: none;">
+                </label>
             </div>
 
             <!-- 待办列表 -->
@@ -1030,6 +1086,7 @@
             priority: 'all', // 优先级筛选：all/high/medium/low
             searchKey: '' // 搜索关键词
         };
+        let currentQuickFilter = 'all'; // 快捷筛选：all/today
         let selectedTodoIds = new Set(); // 批量选择的待办ID集合
 
         // ===================== DOM元素获取 =====================
@@ -1039,6 +1096,7 @@
         const statusFilterBtns = document.querySelectorAll('#status-filter .btn-filter');
         const categoryFilterBtns = document.querySelectorAll('#category-filter .btn-filter');
         const priorityFilterBtns = document.querySelectorAll('#priority-filter .btn-filter');
+        const quickFilterBtns = document.querySelectorAll('#quick-filter .btn-filter');
         const clearBtn = document.getElementById('clear-btn');
         const themeBtn = document.getElementById('theme-btn');
         const themeDropdown = document.getElementById('theme-dropdown');
@@ -1050,6 +1108,8 @@
         const selectAllCheckbox = document.getElementById('select-all');
         const batchCompleteBtn = document.getElementById('batch-complete-btn');
         const batchDeleteBtn = document.getElementById('batch-delete-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const importInput = document.getElementById('import-input');
         // 统计相关元素
         const totalCountEl = document.getElementById('total-count');
         const activeCountEl = document.getElementById('active-count');
@@ -1121,6 +1181,106 @@
             progressFillEl.style.width = `${progressRate}%`;
         }
 
+        // ===================== 新增：拖拽排序 =====================
+        function initDragSort() {
+            const list = document.getElementById('todo-list');
+            let dragItem = null;
+            let dragIndex = -1;
+
+            list.addEventListener('mousedown', (e) => {
+                // 仅在点击待办项（非按钮/复选框）时触发拖拽
+                if (e.target.classList.contains('todo-text') || e.target.closest('.todo-content')) {
+                    dragItem = e.target.closest('.todo-item');
+                    dragIndex = Array.from(list.children).indexOf(dragItem);
+                    dragItem.style.opacity = '0.5';
+                    dragItem.style.cursor = 'grabbing';
+
+                    // 鼠标移动事件
+                    const handleMouseMove = (e) => {
+                        if (!dragItem) return;
+                        dragItem.style.position = 'absolute';
+                        dragItem.style.width = `${list.offsetWidth - 20}px`; // 适配列表宽度
+                        dragItem.style.top = `${e.clientY - 50}px`;
+                        dragItem.style.left = `${list.offsetLeft}px`;
+                        dragItem.style.zIndex = '1000';
+
+                        // 计算落点位置
+                        const items = Array.from(list.children).filter(item => item !== dragItem);
+                        items.forEach(item => {
+                            const rect = item.getBoundingClientRect();
+                            if (e.clientY > rect.top && e.clientY < rect.bottom) {
+                                const targetIndex = Array.from(list.children).indexOf(item);
+                                if (targetIndex !== dragIndex) {
+                                    // 插入到目标位置
+                                    if (targetIndex > dragIndex) {
+                                        list.insertBefore(dragItem, item.nextSibling);
+                                    } else {
+                                        list.insertBefore(dragItem, item);
+                                    }
+                                    dragIndex = targetIndex;
+                                }
+                            }
+                        });
+                    };
+
+                    // 鼠标松开事件
+                    const handleMouseUp = () => {
+                        if (dragItem) {
+                            dragItem.style = '';
+                            // 更新 todos 数组顺序
+                            const newOrderIds = Array.from(list.children).map(item => Number(item.dataset.id));
+                            todos = newOrderIds.map(id => todos.find(todo => todo.id === id));
+                            saveTodos();
+                            renderTodos(); // 重新渲染保持样式一致
+                        }
+
+                        dragItem = null;
+                        dragIndex = -1;
+                        document.removeEventListener('mousemove', handleMouseMove);
+                        document.removeEventListener('mouseup', handleMouseUp);
+                    };
+
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp, { once: true });
+                }
+            });
+        }
+
+        // ===================== 新增：快捷键支持 =====================
+        function initShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // 避免在输入框中触发快捷键
+                if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') return;
+
+                // 1. Ctrl+A 全选
+                if (e.ctrlKey && e.key === 'a') {
+                    e.preventDefault();
+                    selectAllCheckbox.checked = !selectAllCheckbox.checked;
+                    toggleSelectAll();
+                }
+
+                // 2. Delete 删除选中项
+                if (e.key === 'Delete' && selectedTodoIds.size > 0) {
+                    e.preventDefault();
+                    batchDeleteTodos();
+                }
+
+                // 3. Enter 批量完成选中项
+                if (e.key === 'Enter' && selectedTodoIds.size > 0) {
+                    e.preventDefault();
+                    batchCompleteTodos();
+                }
+
+                // 4. Esc 取消全选
+                if (e.key === 'Escape' && selectedTodoIds.size > 0) {
+                    e.preventDefault();
+                    selectedTodoIds.clear();
+                    selectAllCheckbox.checked = false;
+                    renderTodos();
+                }
+            });
+        }
+
         // ===================== 核心逻辑 =====================
         // 初始化：补全历史数据
         completeOldData();
@@ -1129,7 +1289,7 @@
         function renderTodos() {
             todoList.innerHTML = '';
             
-            // 组合筛选：状态 + 分类 + 优先级 + 搜索关键词
+            // 组合筛选：状态 + 分类 + 优先级 + 搜索关键词 + 快捷筛选
             let filteredTodos = todos.filter(todo => {
                 // 状态筛选
                 const statusMatch = currentFilter.status === 'all' 
@@ -1147,8 +1307,17 @@
                 const searchMatch = currentFilter.searchKey === '' 
                     ? true 
                     : todo.text.toLowerCase().includes(currentFilter.searchKey.toLowerCase());
+                // 快捷筛选（今日待办）
+                let quickMatch = true;
+                if (currentQuickFilter === 'today' && todo.deadline) {
+                    const today = new Date();
+                    const todoDate = new Date(todo.deadline);
+                    quickMatch = todoDate.getDate() === today.getDate() && 
+                                  todoDate.getMonth() === today.getMonth() && 
+                                  todoDate.getFullYear() === today.getFullYear();
+                }
 
-                return statusMatch && categoryMatch && priorityMatch && searchMatch;
+                return statusMatch && categoryMatch && priorityMatch && searchMatch && quickMatch;
             });
 
             // 按优先级排序（高优先级在前）+ 按创建时间倒序排序
@@ -1213,7 +1382,7 @@
                                 ${deadlineHtml}
                                 <div class="time-info">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-8 3.58 8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
                                     </svg>
                                     创建于: ${formatTime(todo.createTime)}
                                 </div>
@@ -1405,6 +1574,15 @@
             renderTodos();
         }
 
+        // 切换快捷筛选（今日待办）
+        function changeQuickFilter(filter) {
+            currentQuickFilter = filter;
+            quickFilterBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.quick === filter);
+            });
+            renderTodos();
+        }
+
         // 搜索待办
         function searchTodos(keyword) {
             currentFilter.searchKey = keyword;
@@ -1438,7 +1616,8 @@
                     const categoryMatch = currentFilter.category === 'all' ? true : todo.category === currentFilter.category;
                     const priorityMatch = currentFilter.priority === 'all' ? true : todo.priority === currentFilter.priority;
                     const searchMatch = currentFilter.searchKey === '' ? true : todo.text.toLowerCase().includes(currentFilter.searchKey.toLowerCase());
-                    return statusMatch && categoryMatch && priorityMatch && searchMatch;
+                    const quickMatch = currentQuickFilter === 'all' ? true : (todo.deadline ? new Date(todo.deadline).toDateString() === new Date().toDateString() : false);
+                    return statusMatch && categoryMatch && priorityMatch && searchMatch && quickMatch;
                 });
                 filteredTodos.forEach(todo => selectedTodoIds.add(todo.id));
             }
@@ -1456,7 +1635,8 @@
                 const categoryMatch = currentFilter.category === 'all' ? true : todo.category === currentFilter.category;
                 const priorityMatch = currentFilter.priority === 'all' ? true : todo.priority === currentFilter.priority;
                 const searchMatch = currentFilter.searchKey === '' ? true : todo.text.toLowerCase().includes(currentFilter.searchKey.toLowerCase());
-                return statusMatch && categoryMatch && priorityMatch && searchMatch;
+                const quickMatch = currentQuickFilter === 'all' ? true : (todo.deadline ? new Date(todo.deadline).toDateString() === new Date().toDateString() : false);
+                return statusMatch && categoryMatch && priorityMatch && searchMatch && quickMatch;
             });
 
             if (filteredTodos.length === 0) {
@@ -1491,6 +1671,43 @@
             themeDropdown.classList.remove('active');
         }
 
+        // ===================== 数据导出/导入逻辑 =====================
+        // 导出数据
+        function exportTodos() {
+            const dataStr = JSON.stringify(todos, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TodoMaster_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 导入数据
+        function importTodos(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    // 校验数据格式
+                    if (Array.isArray(importedData) && importedData.every(item => item.id && item.text)) {
+                        if (confirm('导入数据将覆盖现有待办，确定继续？')) {
+                            todos = importedData;
+                            saveTodos();
+                            renderTodos();
+                            alert('数据导入成功！');
+                        }
+                    } else {
+                        alert('导入文件格式错误，请选择正确的待办数据文件！');
+                    }
+                } catch (err) {
+                    alert('数据解析失败，请检查文件格式！');
+                }
+            };
+            reader.readAsText(file);
+        }
+
         // ===================== 事件绑定 =====================
         // 待办列表操作（复选框、编辑、删除、选择）
         todoList.addEventListener('click', (e) => {
@@ -1501,7 +1718,7 @@
             const todoId = Number(todoItem.dataset.id);
 
             // 切换完成状态（点击复选框且不是批量选择时）
-            if (target.classList.contains('todo-checkbox') && e.target.checked !== selectedTodoIds.has(todoId)) {
+            if (target.classList.contains('todo-checkbox')) {
                 // 判断是批量选择还是切换完成状态：如果按住Ctrl键，视为批量选择；否则视为切换完成状态
                 if (e.ctrlKey) {
                     toggleTodoSelect(todoId);
@@ -1524,7 +1741,7 @@
         // 按住Ctrl键点击待办项，批量选择
         todoList.addEventListener('mousedown', (e) => {
             const todoItem = e.target.closest('.todo-item');
-            if (todoItem && e.ctrlKey && !e.target.classList.contains('btn-edit') && !e.target.classList.contains('btn-delete')) {
+            if (todoItem && e.ctrlKey && !e.target.classList.contains('btn-edit') && !e.target.classList.contains('btn-delete') && !e.target.classList.contains('todo-checkbox')) {
                 e.preventDefault();
                 const todoId = Number(todoItem.dataset.id);
                 toggleTodoSelect(todoId);
@@ -1574,6 +1791,13 @@
             });
         });
 
+        // 快捷筛选按钮点击
+        quickFilterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                changeQuickFilter(btn.dataset.quick);
+            });
+        });
+
         // 搜索输入框变化时搜索
         searchInput.addEventListener('input', (e) => {
             searchTodos(e.target.value);
@@ -1590,6 +1814,19 @@
 
         // 清空已完成按钮点击
         clearBtn.addEventListener('click', clearCompletedTodos);
+
+        // 数据导出按钮点击
+        exportBtn.addEventListener('click', exportTodos);
+
+        // 数据导入文件选择
+        importInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                importTodos(file);
+                // 重置文件输入框，允许重复选择同一文件
+                importInput.value = '';
+            }
+        });
 
         // 主题切换按钮点击
         themeBtn.addEventListener('click', () => {
@@ -1611,8 +1848,10 @@
         });
 
         // ===================== 初始化 =====================
-        initTheme();
-        renderTodos();
+        initTheme(); // 初始化主题
+        renderTodos(); // 渲染待办列表
+        initDragSort(); // 初始化拖拽排序
+        initShortcuts(); // 初始化快捷键
     </script>
 </body>
 </html>
